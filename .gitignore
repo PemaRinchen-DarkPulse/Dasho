@@ -1,0 +1,135 @@
+# ---- General ----
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temp files
+.tmp/
+.temp/
+tmp/
+
+# ---- Node / JS / TS ----
+node_modules/
+
+# Explicit workspace paths
+client/node_modules/
+server/node_modules/
+
+# Build outputs
+build/
+dist/
+.out/
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Caches
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Package artifacts
+*.tgz
+
+# Yarn PnP
+.pnp.cjs
+.pnp.loader.mjs
+.pnp.js
+
+# ---- Vite / Frontend ----
+.vite/
+# Some tools put cache here too
+node_modules/.vite/
+
+# Test tooling outputs
+jest-html-reporters-*/
+playwright-report/
+playwright/.cache/
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# Storybook
+storybook-static/
+.out-storybook/
+
+# ---- Env & Secrets ----
+# Never commit real secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+
+# Explicit workspace paths
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+# Keep example files tracked
+!client/.env.example
+!client/.env.sample
+!server/.env.example
+!server/.env.sample
+
+# ---- IDE / Editor ----
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.vscode-test/
+
+# JetBrains
+.idea/
+*.iml
+
+# Misc editors
+*.sw?
+
+# ---- Hosting / Tools ----
+.netlify/
+.vercel/
+.turbo/
+.nx/
+
+# ---- Frameworks (future-proofing) ----
+.next/
+.nuxt/
+.svelte-kit/
+
+# ---- OS-specific Crash dumps ----
+*.stackdump

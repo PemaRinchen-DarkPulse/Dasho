@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* FabLab Management System Design System */
+
+@layer base {
+  :root {
+    /* Brand Colors - Tech/Industrial Palette */
+    --background: 220 15% 97%;
+    --foreground: 220 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 15%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 91% 70%;
+
+    --secondary: 220 15% 95%;
+    --secondary-foreground: 220 25% 25%;
+
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 92%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* Custom Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-hero: linear-gradient(135deg, hsl(220 25% 15%), hsl(220 20% 25%));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(30 100% 60%));
+
+    /* Custom Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+    --shadow-card: 0 4px 20px -2px hsl(220 25% 15% / 0.08);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Brand Colors - Dark Mode */
+    --background: 220 25% 8%;
+    --foreground: 220 15% 95%;
+
+    --card: 220 25% 10%;
+    --card-foreground: 220 15% 95%;
+
+    --popover: 220 25% 10%;
+    --popover-foreground: 220 15% 95%;
+
+    --primary: 217 91% 65%;
+    --primary-foreground: 220 25% 8%;
+    --primary-glow: 217 91% 75%;
+
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 220 15% 85%;
+
+    --muted: 220 20% 12%;
+    --muted-foreground: 220 10% 60%;
+
+    --accent: 25 95% 58%;
+    --accent-foreground: 220 25% 8%;
+
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 220 25% 8%;
+
+    --border: 220 20% 18%;
+    --input: 220 20% 15%;
+    --ring: 217 91% 65%;
+
+    /* Dark Mode Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(220 25% 8%), hsl(220 20% 15%));
+    --shadow-card: 0 4px 20px -2px hsl(0 0% 0% / 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Custom utility classes */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+}
+
+/* Enhance time input UX: hide default clock icon and allow custom icon */
+input[type="time"].time-no-indicator::-webkit-calendar-picker-indicator {
+  display: none;
+}
+input[type="time"].time-no-indicator::-webkit-clear-button,
+input[type="time"].time-no-indicator::-webkit-inner-spin-button {
+  display: none;
+}
+/* Firefox doesn't show a time icon by default, so no-op there */
