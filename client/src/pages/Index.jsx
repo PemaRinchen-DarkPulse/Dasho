@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wrench, Calendar, Users, Zap, ChevronRight, Play } from "lucide-react";
 import heroPrinter from "@/assets/3d-printer-hero.jpg";
+import { useToast } from "@/hooks/use-toast";
+import { getToken, getUser } from "@/lib/api";
 
 const Index = () => {
 	const features = [
@@ -40,7 +42,25 @@ const Index = () => {
 		{ label: "Success Rate", value: "99%" }
 	];
 
-	return (
+		const navigate = useNavigate();
+		const { toast } = useToast();
+
+		const handleAdminClick = () => {
+			const token = getToken();
+			const user = getUser();
+			if (token && user?.role === "admin") {
+				navigate("/admin-dashboard");
+				return;
+			}
+			if (token && user) {
+				toast({ title: "Restricted", description: "Admin access only.", variant: "destructive" });
+				return;
+			}
+			toast({ title: "Sign in required", description: "Please log in to access the admin dashboard." });
+			navigate("/login", { state: { from: "/admin-dashboard", intent: "admin" } });
+		};
+
+		return (
 		<div className="min-h-screen bg-background">
 
 			<section className="relative py-20 overflow-hidden">
@@ -159,10 +179,13 @@ const Index = () => {
 									<ChevronRight className="w-4 h-4 ml-1" />
 								</Link>
 							</Button>
-							<Button variant="outline" size="lg" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-								<Link to="/admin">
-									Admin Dashboard
-								</Link>
+							<Button
+								variant="outline"
+								size="lg"
+								onClick={handleAdminClick}
+								className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+							>
+								Admin Dashboard
 							</Button>
 						</div>
 					</div>

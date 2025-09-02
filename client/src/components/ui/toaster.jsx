@@ -27,6 +27,7 @@ export function Toaster() {
           </Toast>
         )
       })}
+      {/* Viewport anchored to top via component styles */}
       <ToastViewport />
     </ToastProvider>
   )
