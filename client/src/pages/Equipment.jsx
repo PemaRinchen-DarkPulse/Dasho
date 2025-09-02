@@ -100,35 +100,37 @@ const Equipment = () => {
 					</p>
 				</div>
 
-				{/* Filters */}
-				<div className="flex flex-col md:flex-row gap-4 mb-8 p-6 bg-card rounded-xl border border-border shadow-card">
-					<div className="flex-1">
-						<div className="relative">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-							<Input
-								placeholder="Search equipment..."
-								value={searchTerm}
-								onChange={(e) => setSearchTerm(e.target.value)}
-								className="pl-10"
-							/>
+				{/* Filters (only show when there is data) */}
+				{equipment.length > 0 && (
+					<div className="flex flex-col md:flex-row gap-4 mb-8 p-6 bg-card rounded-xl border border-border shadow-card">
+						<div className="flex-1">
+							<div className="relative">
+								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+								<Input
+									placeholder="Search equipment..."
+									value={searchTerm}
+									onChange={(e) => setSearchTerm(e.target.value)}
+									className="pl-10"
+								/>
+							</div>
+						</div>
+						<div className="w-full md:w-48">
+							<Select value={categoryFilter} onValueChange={setCategoryFilter}>
+								<SelectTrigger>
+									<Filter className="w-4 h-4 mr-2" />
+									<SelectValue placeholder="Category" />
+								</SelectTrigger>
+								<SelectContent>
+									{categories.map(category => (
+										<SelectItem key={category} value={category}>
+											{category === "all" ? "All Categories" : category}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
-					<div className="w-full md:w-48">
-						<Select value={categoryFilter} onValueChange={setCategoryFilter}>
-							<SelectTrigger>
-								<Filter className="w-4 h-4 mr-2" />
-								<SelectValue placeholder="Category" />
-							</SelectTrigger>
-							<SelectContent>
-								{categories.map(category => (
-									<SelectItem key={category} value={category}>
-										{category === "all" ? "All Categories" : category}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-				</div>
+				)}
 
 				{/* Equipment Grid */}
 				{error && (
@@ -223,8 +225,8 @@ const Equipment = () => {
 				</div>
 				)}
 
-				{filteredEquipment.length === 0 && (
-					<div className="text-center py-12">
+				{filteredEquipment.length === 0 && !loading && (
+					<div className="text-center py-12 min-h-[50vh] flex flex-col items-center justify-center">
 						<div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
 							<Search className="w-8 h-8 text-primary-foreground" />
 						</div>

@@ -1,5 +1,7 @@
 const { addMinutes, addDays, format, isBefore, isEqual } = require('date-fns');
 const Booking = require('../models/Booking');
+const Maintenance = require('../models/Maintenance');
+const Equipment = require('../models/Equipment');
 
 // Helpers
 function toDateTime(dateStr, timeStr) {
@@ -19,13 +21,20 @@ function computeEndTime(dateStr, startTime, durationMinutes) {
   return { start, end, endTime: toTimeStr(end) };
 }
 
-function isConflict(requestedStart, requestedEnd, bookings) {
-  // Bookings contain startTime/endTime as HH:mm on the same date
-  return bookings.some((b) => {
+function countOverlaps(requestedStart, requestedEnd, bookings) {
+  // Count overlapping bookings
+  return bookings.reduce((acc, b) => {
     const bStart = toDateTime(b.date, b.startTime);
     const bEnd = toDateTime(b.date, b.endTime);
-    // overlap if NOT (end <= b.start OR start >= b.end)
-    return !(requestedEnd <= bStart || requestedStart >= bEnd);
+    return acc + (requestedEnd > bStart && requestedStart < bEnd ? 1 : 0);
+  }, 0);
+}
+
+function isMaintenanceConflict(requestedStart, requestedEnd, maints) {
+  return maints.some((m) => {
+    const mStart = new Date(m.start);
+    const mEnd = new Date(m.end);
+    return !(requestedEnd <= mStart || requestedStart >= mEnd);
   });
 }
 
@@ -70,11 +79,18 @@ exports.checkAvailability = async (req, res) => {
 
   // Fetch confirmed bookings for the same equipment and date (only confirmed block availability)
   const bookings = await Booking.find({ equipmentId, date, status: 'confirmed' }).lean();
+  // Fetch overlapping maintenance windows for the equipment
+  const maints = await Maintenance.find({ equipmentId, status: { $ne: 'cancelled' } }).lean();
 
-  const conflict = isConflict(start, end, bookings);
-    if (!conflict) {
-      return res.json({ available: true });
-    }
+  const equipment = await Equipment.findById(equipmentId).lean();
+  const units = Math.max(1, Number(equipment?.quantity || 1));
+  const perUnitCapacity = Math.max(1, Number(equipment?.capacity || 1));
+  const maxConcurrent = units * perUnitCapacity;
+  const overlaps = countOverlaps(start, end, bookings);
+  const conflict = overlaps >= maxConcurrent || isMaintenanceConflict(start, end, maints);
+  if (!conflict) {
+    return res.json({ available: true });
+  }
 
   const suggestedSlots = await findSuggestions({ equipmentId, date, startTime: time, durationMinutes, stepMinutes: 15, minSuggestions: 5 });
     return res.json({ available: false, suggestedSlots });
@@ -97,10 +113,16 @@ exports.createBooking = async (req, res) => {
 
     // Recheck conflicts
   const bookings = await Booking.find({ equipmentId, date, status: 'confirmed' }).lean();
-    const conflict = isConflict(start, end, bookings);
+  const maints = await Maintenance.find({ equipmentId, status: { $ne: 'cancelled' } }).lean();
+  const equipment = await Equipment.findById(equipmentId).lean();
+  const units = Math.max(1, Number(equipment?.quantity || 1));
+  const perUnitCapacity = Math.max(1, Number(equipment?.capacity || 1));
+  const maxConcurrent = units * perUnitCapacity;
+  const overlaps = countOverlaps(start, end, bookings);
+  const conflict = overlaps >= maxConcurrent || isMaintenanceConflict(start, end, maints);
     if (conflict) {
       const suggestedSlots = await findSuggestions({ equipmentId, date, startTime: time, durationMinutes, stepMinutes: 15, minSuggestions: 5 });
-      return res.status(409).json({ error: 'Time slot conflicts with existing booking', suggestedSlots });
+      return res.status(409).json({ error: 'Time slot conflicts with booking or maintenance', suggestedSlots });
     }
 
     const doc = await Booking.create({

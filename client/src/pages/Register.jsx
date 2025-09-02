@@ -44,9 +44,10 @@ const Register = () => {
 
     setSubmitting(true);
     try {
-      await AuthAPI.register({ name: form.name.trim(), email: form.email, password: form.password });
-      toast({ title: "Account created", description: "You can now sign in." });
-      navigate("/login");
+      const res = await AuthAPI.register({ name: form.name.trim(), email: form.email, password: form.password });
+      sessionStorage.setItem('pendingEmail', form.email);
+      toast({ title: "Verify your email", description: "We sent a 6-digit code to your inbox." });
+      navigate('/verify', { state: { email: form.email } });
     } catch (err) {
       toast({ title: 'Registration failed', description: err.message || 'Please try again.', variant: 'destructive' });
     } finally {

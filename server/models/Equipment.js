@@ -5,6 +5,8 @@ const EquipmentSchema = new mongoose.Schema(
     name: { type: String, required: true },
     category: { type: String, required: true },
     description: String,
+  // Number of identical units available for concurrent use
+  quantity: { type: Number, default: 1, min: 1 },
     capacity: { type: Number, default: 1 },
     bookingMinutes: { type: Number, default: 30 },
   status: { type: String, enum: ['operational', 'maintenance'], default: 'operational' },

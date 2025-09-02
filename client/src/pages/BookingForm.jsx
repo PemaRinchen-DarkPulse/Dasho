@@ -189,12 +189,12 @@ const BookingForm = () => {
 				time: selectedTime,
 				durationMinutes: parseInt(duration)
 			};
-			const res = await BookingAPI.checkAvailability(payload);
+						const res = await BookingAPI.checkAvailability(payload);
 			setAvailabilityResult(res);
 			if (res.available) {
 				toast({ title: "Slot Available!", description: "The selected time slot is available for booking." });
 			} else {
-				toast({ title: "Slot Unavailable", description: "The selected slot is not available. Check suggested alternatives below.", variant: 'destructive' });
+							toast({ title: "Slot Unavailable", description: "The equipment is booked or under maintenance during that time.", variant: 'destructive' });
 			}
 		} catch (error) {
 			toast({ title: 'Availability check failed', description: error.message || 'Please try again.', variant: 'destructive' });

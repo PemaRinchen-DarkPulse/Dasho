@@ -81,6 +81,14 @@ export const AuthAPI = {
   login(payload) {
     return api('/auth/login', { method: 'POST', body: payload, auth: false });
   },
+  verify(payload) {
+    // { email, code }
+    return api('/auth/verify', { method: 'POST', body: payload, auth: false });
+  },
+  resendCode(payload) {
+    // { email }
+    return api('/auth/resend-code', { method: 'POST', body: payload, auth: false });
+  },
 };
 
 export const EquipmentAPI = {
@@ -95,6 +103,16 @@ export const EquipmentAPI = {
   },
   imageUrl(id) {
     return `${API_BASE}/equipment/${id}/image`;
+  },
+};
+
+export const CategoryAPI = {
+  list() {
+    return api('/categories', { method: 'GET', auth: false });
+  },
+  create(payload) {
+    // { name, description? }
+    return api('/categories', { method: 'POST', body: payload, auth: true });
   },
 };
 
@@ -124,5 +142,32 @@ export const BookingAPI = {
   },
   setStatus(id, status, reason = '') {
     return api(`/bookings/${id}/status`, { method: 'PATCH', body: { status, reason }, auth: true });
+  },
+};
+
+export const MaintenanceAPI = {
+  create(payload) {
+    // { equipmentId, type, start, end, assignee, notes }
+    return api('/maintenance', { method: 'POST', body: payload, auth: true });
+  },
+  list(equipmentId) {
+  return api(`/maintenance/${equipmentId}`, { method: 'GET', auth: false });
+  },
+  update(id, payload) {
+    return api(`/maintenance/${id}`, { method: 'PATCH', body: payload, auth: true });
+  },
+  uploadReport(id, file) {
+    const fd = new FormData();
+    fd.append('file', file);
+    return apiFormData(`/maintenance/${id}/report`, { method: 'POST', formData: fd, auth: true });
+  },
+  downloadReportUrl(id) {
+    return `${API_BASE}/maintenance/${id}/report`;
+  },
+};
+
+export const AdminAPI = {
+  stats() {
+    return api('/admin/stats', { method: 'GET', auth: true });
   },
 };

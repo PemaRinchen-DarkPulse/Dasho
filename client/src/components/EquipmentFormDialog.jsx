@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ImagePlus, Upload, Trash2 } from "lucide-react";
-import { EquipmentAPI } from "@/lib/api";
+import { EquipmentAPI, CategoryAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 const EquipmentFormDialog = ({ onAdd }) => {
@@ -15,6 +15,7 @@ const EquipmentFormDialog = ({ onAdd }) => {
     name: "",
     category: "",
     description: "",
+  quantity: 1,
     capacity: 1,
   bookingUnit: "30 minutes", // kept for backward compatibility
   bookingMinutes: 30,
@@ -27,6 +28,10 @@ const EquipmentFormDialog = ({ onAdd }) => {
     imagePreview: "",
   };
   const [form, setForm] = useState(initialState);
+  const [categories, setCategories] = useState([]);
+  const [catDialogOpen, setCatDialogOpen] = useState(false);
+  const [newCat, setNewCat] = useState({ name: "", description: "" });
+  const [categoryOpen, setCategoryOpen] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -46,6 +51,7 @@ const EquipmentFormDialog = ({ onAdd }) => {
     fd.append('name', form.name);
     fd.append('category', form.category);
     if (form.description) fd.append('description', form.description);
+  fd.append('quantity', String(form.quantity || 1));
     fd.append('capacity', String(form.capacity || 1));
     fd.append('bookingMinutes', String(minutes));
   fd.append('status', form.status || 'operational');
@@ -122,6 +128,41 @@ const EquipmentFormDialog = ({ onAdd }) => {
     if (form.imagePreview) URL.revokeObjectURL(form.imagePreview);
   }, [form.imagePreview]);
 
+  // Load categories when the equipment dialog opens
+  useEffect(() => {
+    let cancelled = false;
+    if (!open) return;
+    (async () => {
+      try {
+        const list = await CategoryAPI.list();
+        if (cancelled) return;
+        setCategories((list || []).map((c) => ({ id: c._id, name: c.name })));
+      } catch {
+        setCategories([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [open]);
+
+  const createCategory = async (e) => {
+    e?.preventDefault?.();
+    const name = newCat.name.trim();
+    if (!name) return;
+    try {
+      const res = await CategoryAPI.create({ name, description: newCat.description || '' });
+      // Refresh categories
+      const list = await CategoryAPI.list();
+      setCategories((list || []).map((c) => ({ id: c._id, name: c.name })));
+      // Select the created category
+      setForm((p) => ({ ...p, category: name }));
+      setCatDialogOpen(false);
+      setNewCat({ name: '', description: '' });
+      toast({ title: 'Category saved' });
+    } catch (err) {
+      toast({ title: 'Failed to save category', description: err.message, variant: 'destructive' });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -136,15 +177,29 @@ const EquipmentFormDialog = ({ onAdd }) => {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="sm:basis-[70%]">
               <label className="block font-medium mb-1">Category</label>
-              <Select value={form.category} onValueChange={(val) => handleSelect("category", val)}>
+              <Select 
+                value={form.category}
+                onValueChange={(val) => handleSelect("category", val)}
+                open={categoryOpen}
+                onOpenChange={setCategoryOpen}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="3D Printing">3D Printing</SelectItem>
-                  <SelectItem value="Laser Cutting">Laser Cutting</SelectItem>
-                  <SelectItem value="CNC">CNC</SelectItem>
-                  <SelectItem value="Electronics">Electronics</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id || c.name} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                  <div className="px-2 py-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={() => { setCategoryOpen(false); setCatDialogOpen(true); }}
+                    >
+                      + Create new category
+                    </Button>
+                  </div>
                 </SelectContent>
               </Select>
             </div>
@@ -268,6 +323,10 @@ const EquipmentFormDialog = ({ onAdd }) => {
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
+              <label className="block font-medium mb-1">Quantity</label>
+              <Input name="quantity" type="number" min={1} value={form.quantity} onChange={handleChange} required />
+            </div>
+            <div className="flex-1">
               <label className="block font-medium mb-1">Capacity</label>
               <Input name="capacity" type="number" min={1} value={form.capacity} onChange={handleChange} required />
             </div>
@@ -290,6 +349,29 @@ const EquipmentFormDialog = ({ onAdd }) => {
             <Button type="submit" variant="accent">Add Equipment</Button>
           </div>
         </form>
+
+        {/* New Category Dialog */}
+        {catDialogOpen && (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center" onClick={() => setCatDialogOpen(false)}>
+            <div className="bg-background rounded-lg shadow-elegant w-[95vw] max-w-md p-4" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-semibold mb-3">Create Category</h3>
+              <form onSubmit={createCategory} className="space-y-3">
+                <div>
+                  <label className="block text-sm mb-1">Name</label>
+                  <Input value={newCat.name} onChange={(e) => setNewCat((p) => ({ ...p, name: e.target.value }))} required />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">Description</label>
+                  <Textarea value={newCat.description} onChange={(e) => setNewCat((p) => ({ ...p, description: e.target.value }))} />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setCatDialogOpen(false)}>Cancel</Button>
+                  <Button type="submit" variant="accent">Save</Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

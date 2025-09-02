@@ -75,14 +75,16 @@ const MyBookings = () => {
 
         <p className="text-muted-foreground mb-8">Review and manage your bookings.</p>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-8 p-6 bg-card rounded-xl border border-border shadow-card">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+        {bookings.length > 0 && (
+          <div className="flex flex-col md:flex-row gap-4 mb-8 p-6 bg-card rounded-xl border border-border shadow-card">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {filtered.length > 0 && (
           <Card className="shadow-card">
@@ -144,7 +146,7 @@ const MyBookings = () => {
         )}
 
         {filtered.length === 0 && !loading && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 min-h-[50vh] flex flex-col items-center justify-center">
             <div className="w-16 h-16 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
               <Calendar className="w-8 h-8 text-primary-foreground" />
             </div>

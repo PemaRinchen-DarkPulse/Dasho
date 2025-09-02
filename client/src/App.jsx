@@ -12,6 +12,7 @@ import MyBookings from "./pages/MyBookings";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import Verify from "./pages/Verify";
 import { Toaster } from "@/components/ui/toaster";
 import RootLayout from "./pages/RootLayout";
 import Maintenance from "./pages/Maintenance";
@@ -28,6 +29,7 @@ function App() {
             <Route index element={<Index />} />
             <Route path="register" element={<Register />} />
             <Route path="login" element={<Login />} />
+            <Route path="verify" element={<Verify />} />
             {/* Publicly accessible routes */}
             <Route path="equipment" element={<Equipment />} />
             <Route path="equipment/:id" element={<EquipmentDetail />} />

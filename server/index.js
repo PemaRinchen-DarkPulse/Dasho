@@ -31,12 +31,19 @@ mongoose
 // Routes
 const authRoutes = require('./routes/auth.routes');
 const equipmentRoutes = require('./routes/equipment.routes');
+const categoryRoutes = require('./routes/category.routes');
 const { authMiddleware } = require('./middleware/auth.middleware');
 const bookingRoutes = require('./routes/booking.routes');
+const maintenanceRoutes = require('./routes/maintenance.routes');
+const { startMaintenanceStatusScheduler } = require('./utils/maintenanceScheduler');
+const adminRoutes = require('./routes/admin.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/equipment', equipmentRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Protected example routes for frontend guards
 app.get('/api/protected/equipment', authMiddleware, (req, res) => {
@@ -66,5 +73,18 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Start background scheduler to auto-update maintenance statuses
+const stopScheduler = startMaintenanceStatusScheduler({ intervalMs: 60_000 });
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+	stopScheduler && stopScheduler();
+	server.close(() => process.exit(0));
+});
+process.on('SIGTERM', () => {
+	stopScheduler && stopScheduler();
+	server.close(() => process.exit(0));
+});
 

@@ -46,10 +46,12 @@ const Login = () => {
       const res = await AuthAPI.login({ email: form.email, password: form.password });
       saveAuth({ token: res.token, user: res.user });
       toast({ title: "Welcome back", description: `Signed in as ${res.user.name}` });
-      // Determine redirect target:
-      // 1) If login was triggered from a protected route, go back there (location.state.from)
-      // 2) If user clicked the explicit Log in button (we'll pass state.intent = 'login'), go to My Bookings
-      // 3) Otherwise, fallback: admin -> /admin-dashboard, user -> /equipment
+      // Admins always land on the Admin Dashboard after login
+      if (res?.user?.role === 'admin') {
+        navigate('/admin-dashboard', { replace: true });
+        return;
+      }
+      // Non-admins: use previous intent/route when provided
       const from = location.state?.from;
       const intent = location.state?.intent;
       if (from) {
@@ -57,10 +59,17 @@ const Login = () => {
       } else if (intent === 'login') {
         navigate('/my-bookings', { replace: true });
       } else {
-        navigate(res.redirect || (res.user.role === 'admin' ? '/admin-dashboard' : '/equipment'), { replace: true });
+        navigate(res.redirect || '/equipment', { replace: true });
       }
     } catch (err) {
-      toast({ title: 'Login failed', description: err.message || 'Please try again.', variant: 'destructive' });
+      const msg = err.message || '';
+      if (/not verified/i.test(msg)) {
+        sessionStorage.setItem('pendingEmail', form.email);
+        toast({ title: 'Email not verified', description: 'We sent you a verification code.', variant: 'destructive' });
+        navigate('/verify', { state: { email: form.email } });
+        return;
+      }
+      toast({ title: 'Login failed', description: msg || 'Please try again.', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
